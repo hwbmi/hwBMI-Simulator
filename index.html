@@ -71,10 +71,18 @@ apiInput<!doctype html>
       function connectAPI() {
         //配合啟德 "hwbmi-api.herokuapp.com" 不要超過 22 字元
         //getUrl  = (localAPI)?"http://localhost:5000/?XAPIKEY=xG0y3ziAPN":"https://hwbmi-api.herokuapp.com/?XAPIKEY=xG0y3ziAPN";
-        //postUrl = (localAPI)?"http://localhost:5000/status?XAPIKEY=xG0y3ziAPN":"https://hwbmi-api.herokuapp.com/status?XAPIKEY=xG0y3ziAPN";     
-        var api_base= "http://"+ $("#apiInput").val()+"/";
-        getUrl  = api_base+"?XAPIKEY=xG0y3ziAPN";
-        postUrl = api_base+"status?XAPIKEY=xG0y3ziAPN";  
+        //postUrl = (localAPI)?"http://localhost:5000/status?XAPIKEY=xG0y3ziAPN":"https://hwbmi-api.herokuapp.com/status?XAPIKEY=xG0y3ziAPN";   
+        
+        var api_base;
+        if ($("#apiInput").val()=="localhost:5000"){
+          api_base= "http://"+ $("#apiInput").val()+"/";
+          getUrl  = api_base+"?XAPIKEY=xG0y3ziAPN";
+          postUrl = api_base+"status?XAPIKEY=xG0y3ziAPN";           
+        } else {
+          api_base= "https://"+ $("#apiInput").val()+"/";
+          getUrl  = api_base+"?XAPIKEY=xG0y3ziAPN";
+          postUrl = api_base+"status?XAPIKEY=xG0y3ziAPN";  
+        }
         
         console.log(getUrl);
         sample_rec = one_rec; //JSON.parse(one_rec); 
