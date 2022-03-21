@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title> Charder HWBMI 模擬器 V0.1</title>
+  <meta name="msapplication-tap-highlight" content="no" />
+
+  <!--  using Noto Sans TC is added by Paul Kang-->
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+  
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  
+  <script src="sampleData.js"></script>
+  <script src="samplePicBase64.js"></script>
+  <script src="sampleData_1.js"></script>  
+  <script src="samplePicBase64_1.js"></script>  
+
+  <script src="./uploads.js"></script>
+  <script>
+    var localAPI=false;
+  </script>  
+ 
+</head>
+
+<body id="body">
+
+  <style>
+    .NotoSansFont {
+      font-family: 'Noto Sans TC'; 
+    }
+  </style>
+  
+  <h2 class="NotoSansFont" style="">Charder HWBMI 模擬器 V0.1</h2>
+  
+  <label id="snLabel" style="float:left;width:120px">機器 SN:</label>
+  <input id="snInput" style="float:left;width:330px"><br><br>
+
+  <label id="idLabel" style="float:left;width:120px">User ID:</label>
+  <input id="idInput" style="float:left;width:330px"><br><br>
+
+  <label id="nidLabel" style="float:left;width:120px">Nurse ID:</label>
+  <input id="nidInput" style="float:left;width:330px"><br><br>
+
+  <label id="tareLabel" style="float:left;width:120px">Tare Weight(kg):</label>
+  <input id="tareInput" style="float:left;width:330px"><br><br>
+
+  <label id="netLabel" style="float:left;width:120px">Net Weight(kg):</label>
+  <input id="netInput" style="float:left;width:330px"><br><br>
+
+  <label id="heightLabel" style="float:left;width:120px">Height(cm):</label>
+  <input id="heightInput" style="float:left;width:330px"><br><br>
+
+  <label id="bmiLabel" style="float:left;width:120px">BMI:</label>
+  <input id="bmiInput" style="float:left;width:330px"><br><br>
+
+  <label id="heightLabel" style="float:left;width:120px">量測時間:</label>
+  <input id="timeInput" style="float:left;width:330px"><br><br>       
+
+  <button id="button1" onclick="upload1()">上傳以上一筆資料</button><br><br>
+  <hr>
+  <button id="button2" onclick="upload3()">上傳三筆測試資料</button>
+  <hr>
+  <h1>查詢</h1>
+  <label id="idLabel" style="float:left;width:120px">User ID:</label>
+  <input id="idInputQ" style="float:left;width:330px"><br><br>     
+  <label id="snLabel" style="float:left;width:120px">機器 SN:</label>
+  <input id="snInputQ" style="float:left;width:330px"><br><br>
+
+  <button id="button3" onclick="getDataByID()">Get Data By ID</button>
+  <button id="button3" onclick="getDataBySN()">Get Data by SN</button> <br><br>
+
+  <textarea id="retData" cols="50" style="height:200px;width:450px"></textarea>  
+         
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-app.js"></script>
+   
+  <script> 
+    //配合啟德 "chdr-weight.herokuapp.com" 不要超過 22 字元
+    var getUrl  = (localAPI)?"http://localhost:5000/?XAPIKEY=xG0y3ziAPN":"https://chdr-weight.herokuapp.com/?XAPIKEY=xG0y3ziAPN";
+    var postUrl = (localAPI)?"http://localhost:5000/status?XAPIKEY=xG0y3ziAPN":"https://chdr-weight.herokuapp.com/";      
+    console.log(getUrl);
+    var sample_rec = one_rec; //JSON.parse(one_rec); 
+    $("#snInput").val(sample_rec.sn);
+    $("#idInput").val(sample_rec.packet[0].id);
+    $("#nidInput").val(sample_rec.packet[0].nid);
+    $("#tareInput").val(sample_rec.packet[0].tare_weight);
+    $("#netInput").val(sample_rec.packet[0].net_weight);
+    $("#heightInput").val(sample_rec.packet[0].height);
+    $("#bmiInput").val(sample_rec.packet[0].bmi);
+    //$("#timeInput").val(sample_rec.packet[0].time);      
+
+    var nowDateTime = new Date(Date.now()+8*60*60*1000);
+    var nowDateTimeISO = nowDateTime.toISOString();
+        nowDateTimeISO = nowDateTimeISO.replace('T',' ');
+        nowDateTimeISO = nowDateTimeISO.split('.');
+
+    $("#timeInput").val(nowDateTimeISO[0]);
+    
+      
+    
+    // 上傳  
+    async function upload1() {
+      console.log("Upload 1 rec", postUrl);
+
+      payload(1);  
+      console.log(sample_rec);      
+      //await callPostAPI("", sample_rec)  
+      await callPostData(sample_rec)  
+    }
+    
+    async function upload3() {
+      console.log("Upload 3 rec", postUrl);
+
+      payload(3);  
+      console.log(sample_rec);      
+      //await callPostAPI("", sample_rec)  
+      await callPostData(sample_rec)       
+    }    
+    
+    async function callPostData(dataToPost){
+      paramToSend = "status?XAPIKEY=xG0y3ziAPN"; 
+      res = await callPostAPI(paramToSend, dataToPost);      
+    }    
+    
+//    async function postStatus(status){
+//      if (!powerIsOn) {
+//        console.log("Power is not on, tuen on power first");
+//        //$("#machineStatus").text("請先打開機器電源");
+//        alert("請先打開機器電源");
+//        return;
+//      }      
+//      console.log(status);
+//      $("#machineStatus").text(status);
+//      
+//      var postData = dataToPost[status];    
+//      console.log(postData);
+//      $("#post_timeStamp").text(postData.Timestamp);
+//      $("#post_status").text("status: "+String(postData.status));      
+//      
+//      await callPostData(postData);
+//      //$("#postCloudResponse").text(postResponse);      
+//                  
+//    }    
+    
+    // 查詢
+    async function getDataByID() {
+      console.log("Get Data ID");
+
+      var UserIDQ = $("#idInputQ").val();
+      if (UserIDQ=='') {
+        alert("查詢 UserID 不得為空白");
+        return;
+      }
+
+      $("#retData").text('');
+      res = await callGetAPI('&API=33&UserId='+UserIDQ);
+      //console.log(JSON.parse(res));
+      $("#retData").text(res);             
+    }     
+    
+    async function getDataBySN() {
+      console.log("Get Data SN");
+
+      var SNQ = $("#snInputQ").val();
+      if (SNQ=='') {
+        alert("查詢 SN 不得為空白");
+        return;
+      }
+
+      $("#retData").text('');
+      res = await callGetAPI('&API=34&SN='+SNQ);
+      //console.log(JSON.parse(res));
+      $("#retData").text(res);        
+                    
+    }      
+    
+    function payload(recNum){ 
+      if (recNum==1) {
+        sample_rec = one_rec; //JSON.parse(one_rec);        
+        sample_rec.sn                    = $("#snInput").val();
+        sample_rec.packet[0].id          = $("#idInput").val();
+        sample_rec.packet[0].nid         = $("#nidInput").val();
+        sample_rec.packet[0].tare_weight = $("#tareInput").val();
+        sample_rec.packet[0].net_weight  = $("#netInput").val();
+        sample_rec.packet[0].height      = $("#heightInput").val();
+        sample_rec.packet[0].bmi         = $("#bmiInput").val();
+        sample_rec.packet[0].time        = $("#timeInput").val();
+      } else if (recNum==3) {
+        sample_rec = three_rec; //JSON.parse(one_rec); 
+        var nowDateTime = new Date($("#timeInput").val());          
+        for (var i=0;i<3; i++) {
+          sample_rec.sn                    = $("#snInput").val();
+          sample_rec.packet[i].id          = $("#idInput").val();
+          sample_rec.packet[i].nid         = $("#nidInput").val();
+          sample_rec.packet[i].tare_weight = $("#tareInput").val();
+          sample_rec.packet[i].net_weight  = $("#netInput").val();
+          sample_rec.packet[i].height      = $("#heightInput").val();
+          sample_rec.packet[i].bmi         = $("#bmiInput").val();
+
+
+          var nowDateTimeISO = new Date(nowDateTime.getTime()+(i+8)*60*60*1000).toISOString();
+              nowDateTimeISO = nowDateTimeISO.replace('T',' ');
+              nowDateTimeISO = nowDateTimeISO.split('.');
+
+          sample_rec.packet[i].time        = nowDateTimeISO[0];  
+        }
+      }
+    }    
+    
+    //=====================
+    
+//    var paramToSend = "";
+//    var inputParamString = location.search;
+//    var inputParam = inputParamString.split("&");
+//    var displayName, userId, pictureUrl;
+//    var inputError = false;    
+//    var powerIsOn =false;
+//    var res;
+//
+//    
+//    var paramToSend;   
+//    
+//    
+//
+//    async function getCMD(status){
+//      if (!powerIsOn) {
+//        console.log("Power is not on, tuen on power first");
+//        //$("#machineStatus").text("請先打開機器電源");
+//        alert("請先打開機器電源");
+//        return;
+//      }
+//      
+//      //http://localhost:5000/cmd?XAPIKEY=LAotO6ljsV7rPLiT&Device_id=T00000001
+//      //paramToSend = "cmd?XAPIKEY=LAotO6ljsV7rPLiT&Device_id=T00000001";
+//      paramToSend = "cmd?XAPIKEY=LAotO6ljsV7rPLiT&Device_id="+$("#machineSN_select").val()+"&Machine_status="+status;
+//      res = await callGetAPI(paramToSend); 
+//      //console.log(typeof res);
+//      var result = JSON.parse(res);
+//      $("#get_timeStamp").text("Timestamp: "+String(result.Timestamp));
+//      $("#get_cmd").text("cmd: "+String(result.cmd));      
+//      $("#getCloudResponse").text(res);      
+//      
+//    }
+ 
+    function callGetAPI(param) {      
+      return new Promise(function(resolve, reject) {       
+        var request = new XMLHttpRequest();
+        request.open('GET', getUrl +param, true);
+
+        request.onload = function() {
+          //$.loading.end();
+          //console.log(this.response);
+
+          resolve(this.response);
+        }
+        // Send API request 
+        //$.loading.start(loadingMessage);
+
+        request.send();    
+      });
+    }
+     
+//    var dataToPost = {
+//      "power_onT18000001": {
+//        "Timestamp":Date.now(),
+//        "status":"power_on",
+//        "Model": "MA801",
+//        "APPVer":"V59",
+//        "SN": "T18000001"
+//      },
+//      
+//      "power_onT00000002": {
+//        "Timestamp":Date.now(),
+//        "status":"power_on",
+//        "Model": "MA601",
+//        "APPVer":"V59",
+//        "SN": "T00000002"
+//      }, 
+//
+//      "power_onT20001664": {
+//        "Timestamp":Date.now(),
+//        "status":"power_on",
+//        "Model": "MA601",
+//        "APPVer":"V59",
+//        "SN": "T20001664"
+//      },
+//      
+//      "power_onT20001665": {
+//        "Timestamp":Date.now(),
+//        "status":"power_on",
+//        "Model": "MA601",
+//        "APPVer":"V59",
+//        "SN": "T20001665"
+//      },      
+//      
+//      "power_onT20001666": {
+//        "Timestamp":Date.now(),
+//        "status":"power_on",
+//        "Model": "MA601",
+//        "APPVer":"V59",
+//        "SN": "T20001666"
+//      },      
+//      
+//      "power_onT20001667": {
+//        "Timestamp":Date.now(),
+//        "status":"power_on",
+//        "Model": "MA601",
+//        "APPVer":"V59",
+//        "SN": "T20001667"
+//      },
+//      
+//      "power_onT20001668": {
+//        "Timestamp":Date.now(),
+//        "status":"power_on",
+//        "Model": "MA601",
+//        "APPVer":"V59",
+//        "SN": "T20001668"
+//      },
+//      
+//      "power_onT20001669": {
+//        "Timestamp":Date.now(),
+//        "status":"power_on",
+//        "Model": "MA601",
+//        "APPVer":"V59",
+//        "SN": "T20001669"
+//      },
+//      
+//      "power_onT20001670": {
+//        "Timestamp":Date.now(),
+//        "status":"power_on",
+//        "Model": "MA601",
+//        "APPVer":"V59",
+//        "SN": "T20001670"
+//      },
+//      
+//      "power_onT19002845": {
+//        "Timestamp":Date.now(),
+//        "status":"power_on",
+//        "Model": "MA601",
+//        "APPVer":"V59",
+//        "SN": "T19002845"
+//      },
+//      
+//      "power_onT99999999": {
+//        "Timestamp":Date.now(),
+//        "status":"power_on",
+//        "Model": "UNKNOWN",
+//        "APPVer":"V59",
+//        "SN": "T99999999"
+//      },       
+//      
+//      "select_confirmed": {
+//        "Timestamp":Date.now(),
+//        "status":"select_confirmed"
+//      },
+//      
+//      "user_info_confirmed": {
+//        "Timestamp":Date.now(),
+//        "status":"user_info_confirmed"
+//      },      
+//      
+//      "logged_in": {
+//        "Timestamp":Date.now(),
+//        "status":"logged_in"
+//      },
+//      
+//      "start_weight_measurement": {
+//        "Timestamp":Date.now(),
+//        "status":"start_weight_measurement"
+//      }, 
+//
+//      "weight_measurement_done": {
+//        "Timestamp":Date.now(),
+//        "status":"weight_measurement_done"
+//      },
+//      
+//      "check_electrodes": {
+//        "Timestamp":Date.now(),
+//        "status":"check_electrodes"
+//      }, 
+//            
+//      "check_electrodes_done": {
+//        "Timestamp":Date.now(),
+//        "status":"check_electrodes_done"
+//      }, 
+//
+//      "start_bodycomposition_analysis": {
+//        "Timestamp":Date.now(),
+//        "status":"start_bodycomposition_analysis"
+//      },
+//      
+//      "bodycomposition_analysis_results": {
+//        "Timestamp":Date.now(),
+//        "status":"bodycomposition_analysis_results",
+//        "data": sample_data_1,
+//        "picture": sample_pic_data_base64_1, 
+//      }, 
+//      
+//      "cancel_confirmed": {
+//        "Timestamp":Date.now(),
+//        "status":"cancel_confirmed"
+//      },      
+//      
+//      "cancel": {
+//        "Timestamp":Date.now(),
+//        "status":"cancel"
+//      }, 
+//
+//      "Err_already_selected": {
+//        "Timestamp":Date.now(),
+//        "status":"Err_already_selected"
+//      },      
+//    }
+//     
+//    var postResponse;
+//    async function callPostData(dataToPost){
+//      //http://localhost:5000/status?XAPIKEY=LAotO6ljsV7rPLiT&Device_id=T00000001
+//      paramToSend = "status?XAPIKEY=LAotO6ljsV7rPLiT&Device_id="+$("#machineSN_select").val(); 
+//      res = await callPostAPI(paramToSend, dataToPost);      
+//    }
+//    
+    function callPostAPI(param, dataToPost) {
+      return new Promise(function(resolve, reject) {       
+        var request = new XMLHttpRequest();   // new HttpRequest instance 
+        request.open("POST", postUrl +param, true);
+        request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+        request.onload = function() { 
+          console.log(this.response); 
+          postResponse = "Response:"+this.response; 
+          $("#postCloudResponse").text(postResponse); 
+          
+        }  
+
+        //console.log(JSON.stringify(dataToPost));
+        request.send(JSON.stringify(dataToPost));  
+      });
+    }
+    
+//    function powerToggle(){
+//      console.log("powerToggle", powerIsOn);
+//      
+//      if (powerIsOn) {
+//        $("#powerStatusIcon").css("background-color", "black");
+//        $("#machineType").text("");
+//        powerIsOn = false;
+//      } else {
+//        powerIsOn = true;
+//        postStatus("power_on"+$("#machineSN_select").val());
+//        
+//        $("#powerStatusIcon").css("background-color", "lawngreen");  
+//        console.log("power_on"+$("#machineSN_select").val());
+//        var postData = dataToPost["power_on"+$("#machineSN_select").val()];
+//        $("#machineType").text(postData.Model);
+//      }      
+//    }
+//    
+//    function changeMachine(){
+//      console.log("changeMachine");
+//      if (powerIsOn) powerToggle();
+//    }
+//    
+//    async function postStatus(status){
+//      if (!powerIsOn) {
+//        console.log("Power is not on, tuen on power first");
+//        //$("#machineStatus").text("請先打開機器電源");
+//        alert("請先打開機器電源");
+//        return;
+//      }      
+//      console.log(status);
+//      $("#machineStatus").text(status);
+//      
+//      var postData = dataToPost[status];    
+//      console.log(postData);
+//      $("#post_timeStamp").text(postData.Timestamp);
+//      $("#post_status").text("status: "+String(postData.status));      
+//      
+//      await callPostData(postData);
+//      //$("#postCloudResponse").text(postResponse);      
+//            
+//      
+//    }
+//    
+//    async function 自動化執行(){
+//      await getCMD("idle"); // get cmd: select
+//      
+//      setTimeout( async function() {await postStatus('select_confirmed')}, 1000);
+//      setTimeout( async function() {await getCMD("in_used")}, 2000); // get cmd: user_info      
+//      setTimeout( async function() {await postStatus('user_info_confirmed')}, 3000);
+//      setTimeout( async function() {await postStatus('logged_in')}, 4000); 
+//      setTimeout( async function() {await postStatus('start_weight_measurement')}, 5000);
+//      setTimeout( async function() {await postStatus('weight_measurement_done')}, 6000);
+//      setTimeout( async function() {await postStatus('check_electrodes')}, 7000);    
+//      setTimeout( async function() {await postStatus('check_electrodes_done')}, 8000);  
+//      setTimeout( async function() {await postStatus('bodycomposition_analysis_results')}, 9000); 
+//    }
+//        
+  </script>
+</body>
+
+</html>
