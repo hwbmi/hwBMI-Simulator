@@ -53,13 +53,10 @@
       
     <script src="./uploads.js"></script>
     <script>
-      //const url = "https://charder-weight-api.herokuapp.com/status?XAPIKEY=xG0y3ziAPN";
-      //var getUrl  = (localAPI)?"http://localhost:5000/?XAPIKEY=xG0y3ziAPN":"https://charder-weight-api.herokuapp.com/?XAPIKEY=xG0y3ziAPN";
-      //var postUrl = (localAPI)?"http://localhost:5000/status?XAPIKEY=xG0y3ziAPN":"https://charder-weight-api.herokuapp.com/status?XAPIKEY=xG0y3ziAPN";
-      
-      //配合啟德 "chdr-weight.herokuapp.com" 不要超過 22 字元
-      var getUrl  = (localAPI)?"http://localhost:5000/?XAPIKEY=xG0y3ziAPN":"https://chdr-weight.herokuapp.com/?XAPIKEY=xG0y3ziAPN";
-      var postUrl = (localAPI)?"http://localhost:5000/status?XAPIKEY=xG0y3ziAPN":"https://chdr-weight.herokuapp.com/status?XAPIKEY=xG0y3ziAPN";      
+    
+      //配合啟德 "hwbmi-api.herokuapp.com" 不要超過 22 字元
+      var getUrl  = (localAPI)?"http://localhost:5000/?XAPIKEY=xG0y3ziAPN":"https://hwbmi-api.herokuapp.com/?XAPIKEY=xG0y3ziAPN";
+      var postUrl = (localAPI)?"http://localhost:5000/status?XAPIKEY=xG0y3ziAPN":"https://hwbmi-api.herokuapp.com/status?XAPIKEY=xG0y3ziAPN";      
       console.log(getUrl);
       var sample_rec = one_rec; //JSON.parse(one_rec); 
       $("#snInput").val(sample_rec.sn);
