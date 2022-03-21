@@ -1,4 +1,4 @@
-<!doctype html>
+apiInput<!doctype html>
 <html lang="en">
 
   <head>
@@ -12,6 +12,14 @@
 
   <body>
     <h1>Charder 身高體重計 模擬器 V0.1</h1>
+    
+    <label id="apiLabel" style="float:left;width:120px">API URL:</label>
+    <input id="apiInput" style="float:left;width:330px; margin-right:10px" value="localhost:5000" placeholder="請輸入雲端 API URL">
+    <button id="apiButton" onclick="connectAPI()">連接 API</button>
+    <br> <span style="margin-left:120px">金機興業:   chdr-weight.herokuapp.com</span>
+    <br> <span style="margin-left:120px">測試單位:   hwbmi-api.herokuapp.com</span>
+    <br><br>  
+    
     <label id="snLabel" style="float:left;width:120px">機器 SN:</label>
     <input id="snInput" style="float:left;width:330px"><br><br>
     
@@ -53,27 +61,40 @@
       
     <script src="./uploads.js"></script>
     <script>
-    
-      //配合啟德 "hwbmi-api.herokuapp.com" 不要超過 22 字元
-      var getUrl  = (localAPI)?"http://localhost:5000/?XAPIKEY=xG0y3ziAPN":"https://hwbmi-api.herokuapp.com/?XAPIKEY=xG0y3ziAPN";
-      var postUrl = (localAPI)?"http://localhost:5000/status?XAPIKEY=xG0y3ziAPN":"https://hwbmi-api.herokuapp.com/status?XAPIKEY=xG0y3ziAPN";      
-      console.log(getUrl);
-      var sample_rec = one_rec; //JSON.parse(one_rec); 
-      $("#snInput").val(sample_rec.sn);
-      $("#idInput").val(sample_rec.packet[0].id);
-      $("#nidInput").val(sample_rec.packet[0].nid);
-      $("#tareInput").val(sample_rec.packet[0].tare_weight);
-      $("#netInput").val(sample_rec.packet[0].net_weight);
-      $("#heightInput").val(sample_rec.packet[0].height);
-      $("#bmiInput").val(sample_rec.packet[0].bmi);
-      //$("#timeInput").val(sample_rec.packet[0].time);      
+      var getUrl;
+      var postUrl;
+      var sample_rec;
+      var nowDateTime;
+      var nowDateTimeISO;
+      var apiUrlIsSet=false;
       
-      var nowDateTime = new Date(Date.now()+8*60*60*1000);
-      var nowDateTimeISO = nowDateTime.toISOString();
-          nowDateTimeISO = nowDateTimeISO.replace('T',' ');
-          nowDateTimeISO = nowDateTimeISO.split('.');
-      
-      $("#timeInput").val(nowDateTimeISO[0]);
+      function connectAPI() {
+        //配合啟德 "hwbmi-api.herokuapp.com" 不要超過 22 字元
+        //getUrl  = (localAPI)?"http://localhost:5000/?XAPIKEY=xG0y3ziAPN":"https://hwbmi-api.herokuapp.com/?XAPIKEY=xG0y3ziAPN";
+        //postUrl = (localAPI)?"http://localhost:5000/status?XAPIKEY=xG0y3ziAPN":"https://hwbmi-api.herokuapp.com/status?XAPIKEY=xG0y3ziAPN";     
+        var api_base= "http://"+ $("#apiInput").val()+"/";
+        getUrl  = api_base+"?XAPIKEY=xG0y3ziAPN";
+        postUrl = api_base+"status?XAPIKEY=xG0y3ziAPN";  
+        
+        console.log(getUrl);
+        sample_rec = one_rec; //JSON.parse(one_rec); 
+        $("#snInput").val(sample_rec.sn);
+        $("#idInput").val(sample_rec.packet[0].id);
+        $("#nidInput").val(sample_rec.packet[0].nid);
+        $("#tareInput").val(sample_rec.packet[0].tare_weight);
+        $("#netInput").val(sample_rec.packet[0].net_weight);
+        $("#heightInput").val(sample_rec.packet[0].height);
+        $("#bmiInput").val(sample_rec.packet[0].bmi);
+        //$("#timeInput").val(sample_rec.packet[0].time);      
+
+        nowDateTime    = new Date(Date.now()+8*60*60*1000);
+        nowDateTimeISO = nowDateTime.toISOString();
+        nowDateTimeISO = nowDateTimeISO.replace('T',' ');
+        nowDateTimeISO = nowDateTimeISO.split('.');
+
+        $("#timeInput").val(nowDateTimeISO[0]);
+        apiUrlIsSet=true;
+      }
       
       function payload(recNum){ 
         if (recNum==1) {
@@ -148,6 +169,11 @@
 //      }
       
       async function upload1() {
+        if (!apiUrlIsSet) {
+          alert("Please connect API first");
+          return;
+        }
+        
         console.log("Upload 1 rec", postUrl);
         //var data = {name: "said"};
 
@@ -172,6 +198,11 @@
       }
       
       async function upload3() {
+        if (!apiUrlIsSet) {
+          alert("Please connect API first");
+          return;
+        }      
+        
         console.log("Upload 3 rec");
         //var data = {name: "said"};
 
@@ -195,6 +226,11 @@
       }
       
       async function getDataByID() {
+        if (!apiUrlIsSet) {
+          alert("Please connect API first");
+          return;
+        }
+        
         console.log("Get Data ID");
 
         var UserIDQ = $("#idInputQ").val();
@@ -216,6 +252,11 @@
       } 
       
       async function getDataBySN() {
+        if (!apiUrlIsSet) {
+          alert("Please connect API first");
+          return;
+        }
+        
         console.log("Get Data SN");
 
         var SNQ = $("#snInputQ").val();
