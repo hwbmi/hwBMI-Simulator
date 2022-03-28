@@ -7,8 +7,8 @@ var one_rec =
   "packet":[
     {
       "index":"1",
-      "id":"T11223344",
-      "nid":"F123456",
+      "id":"0000000000",
+      "nid":"100000",
       "tare_weight":"5.0kg",
       "net_weight":"63.2kg",
       "height":"175.0cm",
